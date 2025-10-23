@@ -282,7 +282,7 @@
 
         .instructions {
             position: absolute;
-            bottom: 20px;
+            bottom: 150px; /* AJUSTADO: Movido para cima para liberar espaço para os controles */
             left: 50%;
             transform: translateX(-50%);
             color: #ffa502;
@@ -456,7 +456,7 @@
         const finalScoreElement = document.getElementById('finalScore');
 
         // Grid settings
-        const cellSize = 60; // px
+        const cellSize = 40; // px (AJUSTADO: Reduzido para melhor visualização mobile)
         // Simple predefined maze: 0 = free, 1 = wall
         // 12 cols x 10 rows
         const maze = [
@@ -488,7 +488,7 @@
         let candies = [];
         let ghosts = [];
         let questionZones = [];
-        let witches = []; // NOVO: Array para as bruxas
+        let witches = []; 
         let questionActive = false;
         let questionTimer = null;
         let timeLeft = 15;
@@ -541,7 +541,7 @@
 
         function cellToPixel(col, row) {
             return {
-                x: mazeOffsetX + col * cellSize + (cellSize - 40) / 2,
+                x: mazeOffsetX + col * cellSize + (cellSize - 40) / 2, // 40 é o tamanho fixo do player
                 y: mazeOffsetY + row * cellSize + (cellSize - 40) / 2
             };
         }
@@ -693,7 +693,7 @@
             questionZones.push({el: zone, c: cell.c, r: cell.r});
 
             setTimeout(() => {
-                if (zone.parentNode) zone.parentNode.removeChild(zone);
+                if (zone.parentNode) zone.el.parentNode.removeChild(z.el); // CORRIGIDO: Era z.el.parentNode.removeChild(z.el);
                 questionZones = questionZones.filter(z => z.el !== zone);
             }, 15000);
         }
@@ -877,8 +877,8 @@
             candies.forEach(c => { if (c.el.parentNode) c.el.parentNode.removeChild(c.el); });
             ghosts.forEach(g => { if (g.el.parentNode) g.el.parentNode.removeChild(g.el); });
             questionZones.forEach(z => { if (z.el.parentNode) z.el.parentNode.removeChild(z.el); });
-            witches.forEach(w => { if (w.el.parentNode) w.el.parentNode.removeChild(w.el); }); // NOVO: Limpar bruxas
-            candies = []; ghosts = []; questionZones = []; witches = []; // NOVO: Resetar array bruxas
+            witches.forEach(w => { if (w.el.parentNode) w.el.parentNode.removeChild(w.el); });
+            candies = []; ghosts = []; questionZones = []; witches = [];
 
             startGameTimer();
         }
@@ -888,7 +888,7 @@
             setInterval(() => { if (gameRunning) createCandy(); }, 1500);
             setInterval(() => { if (gameRunning) createGhost(); }, 1000);
             setInterval(() => { if (gameRunning) createQuestionZone(); }, 8000);
-            setInterval(() => { if (gameRunning) createWitch(); }, 5000); // NOVO: Spawnar bruxa a cada 5s
+            setInterval(() => { if (gameRunning) createWitch(); }, 5000);
         }
 
         // Resize handling
@@ -908,19 +908,28 @@
     <script>
         // CORRIGIDO 2/2: CONTROLES MÓVEIS (Máxima Compatibilidade com Press and Hold)
         (function(){
+            // pega os botões
             const upBtn = document.getElementById('upBtn');
             const downBtn = document.getElementById('downBtn');
             const leftBtn = document.getElementById('leftBtn');
             const rightBtn = document.getElementById('rightBtn');
 
+            // função que emula tecla — usa KeyboardEvent igual ao teclado
             function simulateKey(key) {
+                // criar evento e disparar
                 const ev = new KeyboardEvent('keydown', { key: key, bubbles: true, cancelable: true });
                 document.dispatchEvent(ev);
             }
 
-            // Usa pointerdown + setInterval para emular o "press and hold", que é essencial para mobile.
-            const repeatInterval = 160; // ms entre movimentos
+            // O "click" simples foi removido porque o "pointerdown" já inicia o movimento e o "hold"
+            // if (upBtn) upBtn.addEventListener('click', () => simulateKey('ArrowUp'));
+            // if (downBtn) downBtn.addEventListener('click', () => simulateKey('ArrowDown'));
+            // if (leftBtn) leftBtn.addEventListener('click', () => simulateKey('ArrowLeft'));
+            // if (rightBtn) rightBtn.addEventListener('click', () => simulateKey('ArrowRight'));
 
+            // suporte a toque contínuo (press and hold):
+            // quando mantiver pressionado, dispara movimentos repetidos
+            const repeatInterval = 160; // ms entre movimentos quando pressionado
             function addHoldBehavior(btn, key) {
                 let timer = null;
                 
@@ -955,10 +964,11 @@
                 }
             }
 
-            addHoldBehavior(upBtn, 'ArrowUp');
-            addHoldBehavior(downBtn, 'ArrowDown');
-            addHoldBehavior(leftBtn, 'ArrowLeft');
-            addHoldBehavior(rightBtn, 'ArrowRight');
+            // adiciona hold behavior se os botões existirem
+            if (upBtn) addHoldBehavior(upBtn, 'ArrowUp');
+            if (downBtn) addHoldBehavior(downBtn, 'ArrowDown');
+            if (leftBtn) addHoldBehavior(leftBtn, 'ArrowLeft');
+            if (rightBtn) addHoldBehavior(rightBtn, 'ArrowRight');
 
         })();
     </script>
